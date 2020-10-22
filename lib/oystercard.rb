@@ -1,6 +1,7 @@
 class Oystercard
   # allows balance to be accessed outside of the class it is in.
   attr_accessor :balance, :entry_station, :history
+  attr_reader :journey
 
   DEFAULT_BALANCE = 0
   MAX_BALANCE = 90
@@ -23,20 +24,16 @@ class Oystercard
     @balance += amount
   end
 
-  def in_journey?
-    @entry_station != nil
-  end
-
   def touch_in(entry_station)
     raise "insufficient funds." if @balance < @min
-    @entry_station = entry_station
-    @history << {}
+    @journey = Journey.new
+    @journey.entry_station = entry_station
   end
 
   def touch_out(exit_station)
-    deduct
-    @history[-1][entry_station] = exit_station
-    @entry_station = nil
+    @journey.exit_station = exit_station
+    deduct(@journey.fare)
+    finish_journey
   end
 
   def journey_history
@@ -47,6 +44,12 @@ class Oystercard
 
   def deduct(amount = 1)
     @balance -= amount
+  end
+
+  def finish_journey
+    @journey.in_journey = false
+    @history.push @journey
+    @journey = nil
   end
 
 end

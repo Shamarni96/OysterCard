@@ -36,7 +36,7 @@ describe Oystercard do
   describe "#in_journey?" do
     it "returns true if the user is in journey" do
       subject.touch_in(entry_station)
-      expect(subject.in_journey?).to eq true
+      expect(subject.journey.in_journey?).to eq true
     end
   end
 
@@ -47,11 +47,11 @@ describe Oystercard do
     end
     it "remembers the station name when touching in" do
       subject.touch_in(entry_station)
-      expect(subject.entry_station).to eq "Paddington"
+      expect(subject.journey.entry_station).to eq "Paddington"
     end
     it "creates a journey" do
       subject.touch_in(entry_station)
-      expect(subject.history[-1]).to eq ({})
+      expect(subject.journey).not_to eq nil
     end
   end
 
@@ -62,12 +62,22 @@ describe Oystercard do
     end
     it "changes the entry_station to nil" do
       subject.touch_in(entry_station)
-      expect { subject.touch_out(exit_station) }.to change { subject.entry_station }.to nil
+      expect { subject.touch_out(exit_station) }.to change { subject.history.count }.by(1)
     end
     it "creates one journey" do
       subject.touch_in(entry_station)
       subject.touch_out(exit_station)
-      expect(subject.history).to eq [{"Paddington"=>"Bank"}]
+      expect(subject.journey).to eq nil
+    end
+    it "gives the station a name" do
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.history[-1].exit_station).to eq "Bank"
+    end
+    it "sets in journey to false" do
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.history[-1].in_journey).to eq false
     end
   end
 
