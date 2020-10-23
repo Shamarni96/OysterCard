@@ -1,7 +1,8 @@
+require_relative 'journey'
 class Oystercard
   # allows balance to be accessed outside of the class it is in.
   attr_accessor :balance, :entry_station, :history
-  attr_reader :journey
+  attr_reader :journeys
 
   DEFAULT_BALANCE = 0
   MAX_BALANCE = 90
@@ -12,7 +13,7 @@ class Oystercard
     @max = MAX_BALANCE
     @min = MIN_BALANCE
     @entry_station = nil
-    @history = []
+    @journeys = Journeylog.new
   end
 
   def view_balance
@@ -26,14 +27,13 @@ class Oystercard
 
   def touch_in(entry_station)
     raise "insufficient funds." if @balance < @min
-    @journey = Journey.new
-    @journey.entry_station = entry_station
+    @journeys.start(entry_station)
   end
 
   def touch_out(exit_station)
-    @journey.exit_station = exit_station
-    deduct(@journey.fare)
-    finish_journey
+    @journeys.finish(exit_station)
+    p @journeys.journeys
+    deduct(@journeys.journeys[-1].fare)
   end
 
   def journey_history
@@ -44,12 +44,6 @@ class Oystercard
 
   def deduct(amount = 1)
     @balance -= amount
-  end
-
-  def finish_journey
-    @journey.in_journey = false
-    @history.push @journey
-    @journey = nil
   end
 
 end

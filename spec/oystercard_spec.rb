@@ -36,7 +36,7 @@ describe Oystercard do
   describe "#in_journey?" do
     it "returns true if the user is in journey" do
       subject.touch_in(entry_station)
-      expect(subject.journey.in_journey?).to eq true
+      expect(subject.journeys.journey_in_progress.in_journey?).to eq true
     end
   end
 
@@ -47,11 +47,11 @@ describe Oystercard do
     end
     it "remembers the station name when touching in" do
       subject.touch_in(entry_station)
-      expect(subject.journey.entry_station).to eq "Paddington"
+      expect(subject.journeys.journey_in_progress.entry_station).to eq "Paddington"
     end
     it "creates a journey" do
       subject.touch_in(entry_station)
-      expect(subject.journey).not_to eq nil
+      expect(subject.journeys.journey_in_progress).not_to eq nil
     end
   end
 
@@ -60,31 +60,20 @@ describe Oystercard do
       subject.touch_in(entry_station)
       expect { subject.touch_out(exit_station) }.to change { subject.balance }.by(-1)
     end
-    it "changes the entry_station to nil" do
-      subject.touch_in(entry_station)
-      expect { subject.touch_out(exit_station) }.to change { subject.history.count }.by(1)
-    end
+
     it "creates one journey" do
       subject.touch_in(entry_station)
       subject.touch_out(exit_station)
-      expect(subject.journey).to eq nil
+      expect(subject.journeys.journeys.length).to eq 1
     end
-    it "gives the station a name" do
-      subject.touch_in(entry_station)
-      subject.touch_out(exit_station)
-      expect(subject.history[-1].exit_station).to eq "Bank"
-    end
-    it "sets in journey to false" do
-      subject.touch_in(entry_station)
-      subject.touch_out(exit_station)
-      expect(subject.history[-1].in_journey).to eq false
-    end
-  end
 
-  describe "#journey_history" do
-    it "logs the journey history" do
-      expect(subject.journey_history).to eq subject.history
-    end
+    # it "sets in journey to false" do
+    #   allow_any_instance_of(Journeylog).to receive(:fare).and_return 1
+    #   subject.touch_in(entry_station)
+    #   subject.touch_out(exit_station)
+    #   expect(subject.journeys).to receive(:finish)
+    #
+    # end
   end
 
 end

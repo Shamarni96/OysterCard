@@ -1,10 +1,26 @@
 require 'journey_log'
 
-describe Journey_log do
-  it "starts a journey" do
-    expect(Journey_log.start).to eq journey
+describe Journeylog do
+  let(:station) { double :station }
+
+  describe "#start" do
+    it "starts a journey" do
+      subject.start(station)
+      expect(subject.journey_in_progress).not_to eq(nil)
+    end
   end
-  it "ends a journey" do
-    expect(Journey_log.finish).to eq 
+
+  describe "#finish" do
+    before(:each) do
+      subject.start(station)
+      subject.finish(station)
+    end
+
+    it "finishes a journey" do
+      expect(subject.journey_in_progress).to eq(nil)
+    end
+    it "saves the journey to log" do
+      expect(subject.journeys).not_to be_empty
+    end
   end
 end
